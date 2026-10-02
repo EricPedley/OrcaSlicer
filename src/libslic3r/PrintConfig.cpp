@@ -502,6 +502,12 @@ static t_config_enum_values s_keys_map_PrinterStructure {
 };
 CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(PrinterStructure)
 
+static t_config_enum_values s_keys_map_ExtruderRodAxis {
+    {"x", int(ExtruderRodAxis::X)},
+    {"y", int(ExtruderRodAxis::Y)}
+};
+CONFIG_OPTION_ENUM_DEFINE_STATIC_MAPS(ExtruderRodAxis)
+
 static t_config_enum_values s_keys_map_InputShaperType {
     {"Default", int(InputShaperType::Default)},
     {"MZV",     int(InputShaperType::MZV)},
@@ -2220,6 +2226,18 @@ void PrintConfigDef::init_fff_params()
     def->min = 0;
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionFloat(40));
+
+    def = this->add("extruder_rod_axis", coEnum);
+    def->label = L("Rod axis");
+    def->tooltip = L("Axis along which the gantry rod runs. Used for collision avoidance in by-object printing: "
+        "objects taller than the height to rod must not overlap, along the perpendicular axis, with objects printed after them.");
+    def->enum_keys_map = &ConfigOptionEnum<ExtruderRodAxis>::get_enum_values();
+    def->enum_values.push_back("x");
+    def->enum_values.push_back("y");
+    def->enum_labels.push_back("X");
+    def->enum_labels.push_back("Y");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionEnum<ExtruderRodAxis>(ExtruderRodAxis::X));
 
     // BBS
     def = this->add("extruder_clearance_height_to_lid", coFloat);

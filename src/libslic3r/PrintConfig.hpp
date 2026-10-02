@@ -362,6 +362,12 @@ enum PrinterStructure {
     psDelta
 };
 
+// Axis along which the gantry rod (the one limited by extruder_clearance_height_to_rod) runs.
+enum class ExtruderRodAxis {
+    X = 0,
+    Y
+};
+
 enum class InputShaperType : unsigned char {
     Default = 0,
     MZV,
@@ -1523,6 +1529,7 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionInts,               close_fan_the_first_x_layers))
     ((ConfigOptionEnum<DraftShield>,  draft_shield))
     ((ConfigOptionFloat,              extruder_clearance_height_to_rod))//BBs
+    ((ConfigOptionEnum<ExtruderRodAxis>, extruder_rod_axis))
     ((ConfigOptionFloat,              extruder_clearance_height_to_lid))//BBS
     ((ConfigOptionFloat,              extruder_clearance_radius))
     ((ConfigOptionFloat,              nozzle_height))

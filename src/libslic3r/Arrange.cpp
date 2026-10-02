@@ -604,16 +604,21 @@ protected:
             double clearance_height_to_rod = params.clearance_height_to_rod;
             bool hasRowHeightConflict = false;
             bool hasLidHeightConflict = false;
-            auto iy1 = item.boundingBox().minCorner().y();
-            auto iy2 = item.boundingBox().maxCorner().y();
-            auto ix1 = item.boundingBox().minCorner().x();
+            // For a Y rod, swap the roles of the X and Y axes in the tests below.
+            const bool rod_y = params.rod_along_y;
+            auto perp_min = [rod_y](const Item& it) { return rod_y ? it.boundingBox().minCorner().x() : it.boundingBox().minCorner().y(); };
+            auto perp_max = [rod_y](const Item& it) { return rod_y ? it.boundingBox().maxCorner().x() : it.boundingBox().maxCorner().y(); };
+            auto par_min  = [rod_y](const Item& it) { return rod_y ? it.boundingBox().minCorner().y() : it.boundingBox().minCorner().x(); };
+            auto iy1 = perp_min(item);
+            auto iy2 = perp_max(item);
+            auto ix1 = par_min(item);
 
             for (int i = 0; i < m_items.size(); i++) {
                 Item& p = m_items[i];
                 if (p.is_virt_object) continue;
-                auto px1 = p.boundingBox().minCorner().x();
-                auto py1 = p.boundingBox().minCorner().y();
-                auto py2 = p.boundingBox().maxCorner().y();
+                auto px1 = par_min(p);
+                auto py1 = perp_min(p);
+                auto py2 = perp_max(p);
                 auto inter_min = std::max(iy1, py1); // min y of intersection
                 auto inter_max = std::min(iy2, py2); // max y of intersection. length=max_y-min_y>0 means intersection exists
                 // if this item is lower than existing ones, this item will be printed first, so should not exceed height_to_rod

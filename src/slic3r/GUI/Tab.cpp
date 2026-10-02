@@ -4561,6 +4561,7 @@ void TabPrinter::build_fff()
         optgroup = page->new_optgroup(L("Extruder Clearance"), "param_extruder_clearance");
         optgroup->append_single_option_line("extruder_clearance_radius", "printer_basic_information_extruder_clearance#radius");
         optgroup->append_single_option_line("extruder_clearance_height_to_rod", "printer_basic_information_extruder_clearance#height-to-rod");
+        optgroup->append_single_option_line("extruder_rod_axis", "printer_basic_information_extruder_clearance#rod-axis");
         optgroup->append_single_option_line("extruder_clearance_height_to_lid", "printer_basic_information_extruder_clearance#height-to-lid");
 
         optgroup = page->new_optgroup(L("Adaptive bed mesh"), "param_adaptive_mesh");

@@ -123,6 +123,7 @@ bool Print::invalidate_state_by_config_options(const ConfigOptionResolver & /* n
         "filament_end_gcode",
         "post_process",
         "extruder_clearance_height_to_rod",
+        "extruder_rod_axis",
         "extruder_clearance_height_to_lid",
         "extruder_clearance_radius",
         "nozzle_height",
@@ -869,6 +870,8 @@ StringObjectException Print::sequential_print_clearance_valid(const Print &print
 
         // if objects are not overlapped on y-axis, they will not collide even if they are taller than extruder_clearance_height_to_rod
         int print_instance_count = print_instance_with_bounding_box.size();
+        // The rod spans the axis perpendicular to rod_axis' overlap test: Y extents for an X rod, X extents for a Y rod.
+        const bool rod_along_y = print.config().extruder_rod_axis == ExtruderRodAxis::Y;
         std::map<const PrintInstance*, std::pair<Polygon, float>> too_tall_instances;
         for (int k = 0; k < print_instance_count; k++)
         {
@@ -876,8 +879,8 @@ StringObjectException Print::sequential_print_clearance_valid(const Print &print
             // 只需要考虑喷嘴到滑杆的偏移量，这个比整个工具头的碰撞半径要小得多
             // Only the offset from the nozzle to the slide bar needs to be considered, which is much smaller than the collision radius of the entire tool head.
             auto bbox = print_instance_with_bounding_box[k].bounding_box.inflated(-scale_(0.5 * print.config().extruder_clearance_radius.value + object_skirt_offset));
-            auto iy1 = bbox.min.y();
-            auto iy2 = bbox.max.y();
+            auto iy1 = rod_along_y ? bbox.min.x() : bbox.min.y();
+            auto iy2 = rod_along_y ? bbox.max.x() : bbox.max.y();
             (const_cast<ModelInstance*>(inst->model_instance))->arrange_order = k+1;
             double height = (k == (print_instance_count - 1))?printable_height:hc1;
             /*if (has_interlaced_objects) {
@@ -895,8 +898,8 @@ StringObjectException Print::sequential_print_clearance_valid(const Print &print
             {
                 auto& p = print_instance_with_bounding_box[i].print_instance;
                 auto bbox2 = print_instance_with_bounding_box[i].bounding_box;
-                auto py1 = bbox2.min.y();
-                auto py2 = bbox2.max.y();
+                auto py1 = rod_along_y ? bbox2.min.x() : bbox2.min.y();
+                auto py2 = rod_along_y ? bbox2.max.x() : bbox2.max.y();
                 auto inter_min = std::max(iy1, py1); // min y of intersection
                 auto inter_max = std::min(iy2, py2); // max y of intersection. length=max_y-min_y>0 means intersection exists
                 if (inter_max - inter_min > 0) {

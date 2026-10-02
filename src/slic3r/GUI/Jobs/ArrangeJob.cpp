@@ -769,6 +769,7 @@ arrangement::ArrangeParams init_arrange_params(Plater *p)
 
     params.clearance_height_to_rod             = print_config.extruder_clearance_height_to_rod.value;
     params.clearance_height_to_lid             = print_config.extruder_clearance_height_to_lid.value;
+    params.rod_along_y                         = print_config.extruder_rod_axis == ExtruderRodAxis::Y;
     params.clearance_radius                    = print_config.extruder_clearance_radius.value + object_skirt_offset * 2;
     params.object_skirt_offset                 = object_skirt_offset;
     params.printable_height                    = print_config.printable_height.value;

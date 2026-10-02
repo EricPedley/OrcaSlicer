@@ -131,6 +131,7 @@ struct ArrangeParams {
     float bed_shrink_y = 1;
     float brim_skirt_distance = 0;
     float clearance_height_to_rod = 0;
+    bool  rod_along_y             = false; // gantry rod runs along Y instead of X
     float clearance_height_to_lid = 0;
     float clearance_radius = 0;
     float object_skirt_offset = 0;

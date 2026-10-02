@@ -5650,16 +5650,21 @@ void GLCanvas3D::update_sequential_clearance()
     }
 
     //sort the print instance
+    // For a Y rod, swap the roles of the X and Y axes in the ordering and overlap tests below.
+    const bool rod_along_y = fff_print()->config().extruder_rod_axis == ExtruderRodAxis::Y;
+    auto perp_min = [rod_along_y](const BoundingBox& bb) { return rod_along_y ? bb.min.x() : bb.min.y(); };
+    auto perp_max = [rod_along_y](const BoundingBox& bb) { return rod_along_y ? bb.max.x() : bb.max.y(); };
+    auto par_min  = [rod_along_y](const BoundingBox& bb) { return rod_along_y ? bb.min.y() : bb.min.x(); };
     std::sort(convex_and_bounding_boxes.begin(), convex_and_bounding_boxes.end(),
-        [](auto &l, auto &r) {
-            auto ly1 = l.bounding_box.min.y();
-            auto ly2 = l.bounding_box.max.y();
-            auto ry1 = r.bounding_box.min.y();
-            auto ry2 = r.bounding_box.max.y();
+        [&](auto &l, auto &r) {
+            auto ly1 = perp_min(l.bounding_box);
+            auto ly2 = perp_max(l.bounding_box);
+            auto ry1 = perp_min(r.bounding_box);
+            auto ry2 = perp_max(r.bounding_box);
             auto inter_min = std::max(ly1, ry1);
             auto inter_max = std::min(ly2, ry2);
-            auto lx = l.bounding_box.min.x();
-            auto rx = r.bounding_box.min.x();
+            auto lx = par_min(l.bounding_box);
+            auto rx = par_min(r.bounding_box);
             if (inter_max - inter_min > 0)
                 return (lx < rx) || ((lx == rx)&&(ly1 < ry1));
             else
@@ -5699,8 +5704,8 @@ void GLCanvas3D::update_sequential_clearance()
     {
         Polygon& convex = convex_and_bounding_boxes[k].hull_polygon;
         BoundingBox& bbox = convex_and_bounding_boxes[k].bounding_box;
-        auto iy1 = bbox.min.y();
-        auto iy2 = bbox.max.y();
+        auto iy1 = perp_min(bbox);
+        auto iy2 = perp_max(bbox);
         double height = (k == (bounding_box_count - 1))?printable_height:hc1;
 
         /*if (has_interlaced_objects) {
@@ -5718,8 +5723,8 @@ void GLCanvas3D::update_sequential_clearance()
         {
             Polygon&     next_convex = convex_and_bounding_boxes[i].hull_polygon;
             BoundingBox& next_bbox   = convex_and_bounding_boxes[i].bounding_box;
-            auto py1 = next_bbox.min.y();
-            auto py2 = next_bbox.max.y();
+            auto py1 = perp_min(next_bbox);
+            auto py2 = perp_max(next_bbox);
             auto inter_min = std::max(iy1, py1); // min y of intersection
             auto inter_max = std::min(iy2, py2); // max y of intersection. length=max_y-min_y>0 means intersection exists
             if (inter_max - inter_min > 0) {
